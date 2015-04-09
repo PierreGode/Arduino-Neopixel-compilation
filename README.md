@@ -1,8 +1,8 @@
 # Arduino-Neopixel-compilation
-A compilation of diferent Voids to be controlled by joystick. just ad a
-new voyd or existing to joystickShield.is.
+A compilation of different Voids to be controlled by joystick. 
+just ad a new voyd or existing to joystickShield.is.*
 controll your Adafruit_NeoMatrix 8x8 - 64 RGB LED Pixel Matrix with an
-arduino a youstick and a  5v powersupply ( works fantastic for hours
+arduino a youstick and a 5v powersupply ( works fantastic for hours
 with an powerpack of 5000mah ).
 adjust brightness with strip.setBrightness(**) and
 matrix.setBrightness(**) and add,remove,change rainbow colors with
