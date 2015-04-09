@@ -1,0 +1,305 @@
+///////////////////////////////////////////////////INCLUDE & DEFINE/////////////////////////////////////////////////////////////////////////////
+#include <Adafruit_GFX.h>
+#include <Adafruit_NeoMatrix.h>
+#include <Adafruit_NeoPixel.h>
+#include <avr/power.h>
+#include <Adafruit_NeoPixel.h>
+#include <avr/power.h>
+#include <JoystickShield.h> // include JoystickShield Library
+JoystickShield joystickShield; // create an instance of JoystickShield object
+#ifndef PSTR
+#define PSTR
+#endif
+#define PIN 6
+#define N_LEDS 8
+#define NUMPIXELS      40
+Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(6, 8, PIN,
+  NEO_MATRIX_TOP     + NEO_MATRIX_RIGHT +
+  NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
+  NEO_GRB            + NEO_KHZ800);
+const uint16_t colors[] = {
+matrix.Color(255, 0, 0), matrix.Color(0, 255, 140), matrix.Color(0, 234, 255), matrix.Color(255, 0, 0), matrix.Color(0, 0, 255), matrix.Color(133, 53, 155) };
+//matrix.Color(0, 255, 140) };
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(40, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+int delayval = 0; // delay for half a second
+int pixColor;
+int pixVal;
+////////////////////////////////////////////THE SETUP//////////////////////////////////////////////////////////////////////////////
+void setup() {
+  matrix.begin();
+  matrix.setTextWrap(false);
+  matrix.setBrightness(30);    ///SET TEXT BRIGHTNESS
+  pixels.setBrightness(30);
+  matrix.setTextColor(colors[0]);
+  strip.begin();
+  strip.show(); 
+ strip.setBrightness(30); ///SET RANDOM LIGTHS BRIGHTNESS
+    Serial.begin(9600);
+    delay(10);
+    // new calibration function
+    joystickShield.calibrateJoystick();
+	// predefined Joystick to Pins 0 and 1.
+	// Change it if you are using a different shield
+	//joystickShield.setJoystickPins(0, 1);
+	// predefined buttons to the following pins.
+	// change it if you are using a different shield.
+	// setButtonPins(pinJoystickButton, pinUp, pinRight, pinDown, pinLeft, pinF, pinE);
+	// to deactivate a button use a pin outside of the range of the arduino e.g. 255, but not above
+	// setButtonPins(8, 2, 3, 4, 5, 7, 6);
+}
+int pos = 0, dir = 1; 
+int x    = matrix.width();
+int pass = 0;
+///////////////////////////////////////THE LOOP///////////////////////////////////////////////////////////////////////////////////
+void loop() {
+  joystickShield.processEvents(); // process events
+  if (joystickShield.isUp()) {
+setblue();
+}
+  if (joystickShield.isRightUp()) {
+settextdino() ;
+  }
+  if (joystickShield.isRight()) {
+setrandom() ;
+  }
+  if (joystickShield.isRightDown()) {
+setrandom1() ;
+  }
+  if (joystickShield.isDown()) {
+setgreen();
+  }
+  if (joystickShield.isLeftDown()) {
+setorange() ;
+  }
+  if (joystickShield.isLeft()) {
+setpurple() ;
+  }
+  if (joystickShield.isLeftUp()) {
+settext();
+ }
+  if (joystickShield.isJoystickButton()) {
+ white() ;
+  }
+  if (joystickShield.isUpButton()) {
+     Serial.println("Up Button Clicked") ;
+  }
+  if (joystickShield.isRightButton()) {
+     Serial.println("Right Button Clicked") ;
+  }
+  if (joystickShield.isDownButton()) {
+     Serial.println("Down Button Clicked") ;
+  }
+  if (joystickShield.isLeftButton()) {
+     Serial.println("Left Button Clicked") ;
+  }
+  // new eventfunctions //MY BUTTON
+  if (joystickShield.isEButton()) {
+     Serial.println("E Button Clicked") ;
+  }
+  if (joystickShield.isFButton()) {
+     Serial.println("F Button Clicked") ;
+  }  
+  if (joystickShield.isNotCenter()){
+     Serial.println("NotCenter") ;
+  }
+  // new position functions
+  Serial.print("x ");	Serial.print(joystickShield.xAmplitude());Serial.print(" y ");Serial.println(joystickShield.yAmplitude());
+  delay(80);
+}
+//////////////////////////// THE VOIDS//////////////////////////////////////////////////////////////////////////////////////////
+
+void rainbow(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+// Slightly different, this makes the rainbow equally distributed throughout
+void rainbowCycle(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+//Theatre-style crawling lights.
+void theaterChase(uint32_t c, uint8_t wait) {
+  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
+    for (int q=0; q < 3; q++) {
+      for (int i=0; i < strip.numPixels(); i=i+3) {
+        strip.setPixelColor(i+q, c);    //turn every third pixel on
+      }
+      strip.show();
+     
+      delay(wait);
+     
+      for (int i=0; i < strip.numPixels(); i=i+3) {
+        strip.setPixelColor(i+q, 0);        //turn every third pixel off
+      }
+    }
+  }
+}
+//Theatre-style crawling lights with rainbow effect
+void theaterChaseRainbow(uint8_t wait) {
+  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
+    for (int q=0; q < 3; q++) {
+        for (int i=0; i < strip.numPixels(); i=i+3) {
+          strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+        }
+        strip.show();
+       
+        delay(wait);
+       
+        for (int i=0; i < strip.numPixels(); i=i+3) {
+          strip.setPixelColor(i+q, 0);        //turn every third pixel off
+        }
+    }
+  }
+}
+///////////////////////////MY PERSONAL VOIDS//////////////////////////////
+void white() {
+  for(int i=0;i<NUMPIXELS;i++){
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    pixels.setPixelColor(i, pixels.Color(255,255,255)); // Moderately bright green color.
+    //pixels.setBrightness(255);
+    pixels.show(); // This sends the updated pixel color to the hardware.
+    delay(delayval); // Delay for a period of time (in milliseconds). 
+    //pixels.setBrightness(30);
+ }
+}
+void setorange() {
+  for(int i=0;i<NUMPIXELS;i++){
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    pixels.setPixelColor(i, pixels.Color(255,100,0)); // Moderately bright green color.
+//    pixels.setBrightness(255);
+    pixels.show(); // This sends the updated pixel color to the hardware.
+    delay(delayval); // Delay for a period of time (in milliseconds). 
+//    pixels.setBrightness(30);
+ }
+}
+void setblue() {
+  for(int i=0;i<NUMPIXELS;i++){
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    pixels.setPixelColor(i, pixels.Color(0,0,255)); // Moderately bright green color.
+    pixels.show(); // This sends the updated pixel color to the hardware.
+    delay(delayval); // Delay for a period of time (in milliseconds). 
+ }
+}
+void setgreen() {
+  for(int i=0;i<NUMPIXELS;i++){
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    pixels.setPixelColor(i, pixels.Color(0,255,0)); // Moderately bright green color.
+    pixels.show(); // This sends the updated pixel color to the hardware.
+    delay(delayval); // Delay for a period of time (in milliseconds).
+ }
+}
+void setpurple() {
+  for(int i=0;i<NUMPIXELS;i++){
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    pixels.setPixelColor(i, pixels.Color(186,43,226)); // Moderately bright green color.
+    pixels.show(); // This sends the updated pixel color to the hardware.
+    delay(delayval); // Delay for a period of time (in milliseconds).
+ }
+}
+/////
+void settext() {
+ ///// TEXTLOOP///////
+  matrix.fillScreen(0);
+  matrix.setCursor(x, 0);
+  matrix.print(F("JACK"));
+  if(--x < -22) {
+    x = matrix.width();
+    if(++pass >= 3) pass = 0;
+    matrix.setTextColor(colors[pass]);
+  }
+      matrix.show();
+  delay(100);
+}
+  ///// TEXTLOOP/////////
+  
+void settextdino() {
+  
+ ///// TEXTLOOP///////
+  matrix.fillScreen(0);
+  matrix.setCursor(x, 0);
+  matrix.print(F("LOVE"));
+  if(--x < -22) {
+    x = matrix.width();
+    if(++pass >= 3) pass = 0;
+    matrix.setTextColor(colors[pass]);
+  }
+  matrix.show();
+//  delay(2);
+}
+  ///// TEXTLOOP/////////
+void setrandom1() {
+  //// MATRIXLOOP/////
+//  colorWipe(strip.Color(255, 0, 0), 25); // Red
+//  colorWipe(strip.Color(0, 255, 0), 25); // Green
+//  colorWipe(strip.Color(0, 0, 255), 25); // Blue
+  // Send a theater pixel chase in...
+//  theaterChase(strip.Color(186, 43, 226), 110); // White
+//  theaterChase(strip.Color(127,   0,   0), 50); // Red
+//  theaterChase(strip.Color(  0,   0, 127), 50); // Blue
+//  rainbow(20);
+//  rainbowCycle(20);
+  theaterChaseRainbow(100);
+  matrix.show();
+  delay(50);
+}
+void setrandom() { 
+      /////LEDSLOOP////////
+//  for(int i=0;i<NUMPIXELS;i++){
+//    delay(50); // Delay for a period of time (in milliseconds).
+//    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+//    pixels.setPixelColor(i, pixels.Color(110,65,236)); // Moderately bright green color.
+//    pixels.show(); // This sends the updated pixel color to the hardware.
+//  }
+  /////LEDSLOOP//////// 
+  //// MATRIXLOOP/////
+  colorWipe(strip.Color(255, 0, 0), 25); // Red
+  colorWipe(strip.Color(0, 255, 0), 25); // Green
+  colorWipe(strip.Color(0, 0, 255), 25); // Blue
+  // Send a theater pixel chase in...
+  theaterChase(strip.Color(186, 43, 226), 110); // White
+  //theaterChase(strip.Color(127,   0,   0), 50); // Red
+  //theaterChase(strip.Color(  0,   0, 127), 50); // Blue
+  rainbow(20);
+  rainbowCycle(20);
+  //theaterChaseRainbow(60);
+  matrix.show();
+  delay(2);
+}
+// Fill the dots one after the other with a color
+void colorWipe(uint32_t c, uint8_t wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+      strip.show();
+      delay(wait);
+  }
+}
+///////////////////////////MY PERSONAL VOIDS//////////////////////////////
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } else if(WheelPos < 170) {
+    WheelPos -= 85;
+   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  } else {
+   WheelPos -= 170;
+   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  }
+}
